@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: entity
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: Hacker￢ﾀﾔ￨ﾰﾭ￩ﾜﾇ￥ﾼﾘ
+Implementation-Vendor-Id: cn.hongtianren
+Build-Jdk: 1.8.0_151
+Implementation-URL: http://projects.spring.io/spring-boot/by-parent/by
+ -entity/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+

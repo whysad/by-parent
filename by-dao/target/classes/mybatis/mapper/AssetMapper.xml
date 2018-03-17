@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hongtianren.dao.AssetMapper">
+
+	<!-- 查看资产申请列表 -->
+	<select id="findDeclarationList" resultType="cn.hongtianren.entity.AssetDeclaration">
+		SELECT
+		ad.id,
+		ad.`create`,
+		ad.`status`,
+		ad.term,
+		e.`name` AS employee,
+		a.`name` AS asset,
+		c.`name` AS category
+		FROM
+		asset_declaration ad
+		INNER JOIN employee e ON ad.employee = e.id
+		INNER JOIN asset a ON
+		ad.asset = a.id
+		INNER JOIN category c ON a.category = c.id
+		<if test="username != null">
+			INNER JOIN admin adm ON e.admin = adm.id
+			WHERE adm.username
+			= #{username}
+		</if>
+	</select>
+
+	<!-- 根据用户名查询资产信息 -->
+	<select id="findAssetByUsername" resultType="cn.hongtianren.entity.Asset">
+		SELECT
+		a.id,
+		a.modifyed,
+		a.`name`,
+		c.`name` AS category,
+		au.expire_date AS expireDate
+		FROM
+		asset a
+		INNER JOIN category c ON a.category = c.id
+		INNER JOIN employee e ON a.employee = e.id
+		INNER JOIN admin adm ON e.admin = adm.id
+		AND adm.username = #{username}
+		INNER JOIN asset_use au ON a.id = au.asset
+		AND (au.expire_date > NOW() OR au.expire_date is null)
+		WHERE a.is_use = 1 AND a.is_destroy = 0
+	</select>
+	
+	<!-- 根据id查询资产信息 -->
+	<select id="findAssetById" resultType="cn.hongtianren.entity.Asset">
+		SELECT asset.id,asset.name,asset.category,asset.image,asset.is_use,asset.employee
+		from asset
+		where id = #{id}
+	</select>
+
+	<!-- 查询资产信息 -->
+	<select id="findAssetList" resultType="cn.hongtianren.entity.Asset">
+		SELECT
+		a.id,
+		a.modifyed,
+		a.`name`,
+		a.is_use AS isUse,
+		c.`name` AS category,
+		e.`name` AS employee
+		FROM
+		asset a
+		INNER JOIN category c ON a.category = c.id
+		LEFT JOIN employee e ON a.employee = e.id
+		WHERE a.is_destroy = 0
+		<if test="name != null">
+			AND
+			a.`name` like CONCAT('%',#{name},'%')
+		</if>
+	</select>
+	
+	<!-- 根据名字查询资产信息 -->
+	<select id="findAssetListByName" resultType="cn.hongtianren.entity.Asset">
+		SELECT *
+		from asset
+		WHERE asset.`name` like CONCAT('%',#{name},'%')
+	</select>
+
+	<!-- 根据id查找申报信息 -->
+	<select id="findDeclarationById" resultType="cn.hongtianren.entity.AssetDeclaration">
+		SELECT
+		ad.id,
+		ad.`create`,
+		ad.`status`,
+		ad.term,
+		e.id AS employeeId,
+		e.`name` AS employee,
+		a.id AS assetId,
+		a.`name` AS asset,
+		c.`name` AS category
+		FROM
+		asset_declaration ad
+		INNER JOIN employee e ON ad.employee = e.id
+		INNER JOIN asset a ON
+		ad.asset = a.id
+		INNER JOIN category c ON a.category = c.id
+		WHERE ad.id = #{id}
+	</select>
+
+	<!-- 添加资产使用信息 -->
+	<insert id="saveUse" parameterType="cn.hongtianren.entity.AssetUse">
+		INSERT INTO asset_use VALUES(
+		#{id},
+		#{create},
+		#{modifyed},
+		#{employee},
+		#{asset},
+		<choose>
+			<when test="expireDate!=null">
+				#{expireDate}
+			</when>
+			<otherwise>
+				null
+			</otherwise>
+		</choose>
+		)
+	</insert>
+
+	<!-- 添加申报信息 -->
+	<insert id="saveDeclare" parameterType="cn.hongtianren.entity.AssetDeclaration">
+		INSERT INTO
+		asset_declaration (
+		`create`,
+		modifyed,
+		employee,
+		asset,
+		term,
+		`status`
+		)
+		VALUES
+		(
+		#{create},
+		#{modifyed},
+		#{employeeId},
+		#{assetId},
+		#{term},
+		#{status}
+		)
+	</insert>
+
+	<!-- 添加资产信息 -->
+	<insert id="saveAsset" parameterType="cn.hongtianren.entity.Asset">
+		INSERT INTO asset (
+		`create`,
+		modifyed,
+		`name`,
+		category
+		)
+		VALUES
+		(
+		#{create},
+		#{modifyed},
+		#{name},
+		#{categoryId}
+		)
+	</insert>
+
+
+</mapper>
